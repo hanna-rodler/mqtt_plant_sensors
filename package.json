@@ -4,8 +4,9 @@
     "version": "1.0.0",
     "type": "module",
     "scripts": {
-        "start": "node index.js",
-        "build": "echo \"No build necessary\""
+        "start": "node src/index.js",
+        "build": "echo \"No build necessary\"",
+        "dev": "node index.js"
     },
     "dependencies": {
         "dotenv": "^16.3.1",

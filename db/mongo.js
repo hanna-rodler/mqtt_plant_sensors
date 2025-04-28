@@ -1,0 +1,41 @@
+import mongoose from "mongoose";
+
+const lightSensorSchema = new mongoose.Schema({
+  light: Number,
+  timestamp: { type: Date, default: Date.now },
+});
+
+const moistureSensorSchema = new mongoose.Schema({
+  moisture: Number,
+  timestamp: { type: Date, default: Date.now },
+});
+
+const temperatureSensorSchema = new mongoose.Schema({
+  temperature: Number,
+  timestamp: { type: Date, default: Date.now },
+});
+
+export const LightSensorReading = mongoose.model("light", lightSensorSchema);
+
+export const MoistureSensorReading = mongoose.model(
+  "moisture",
+  moistureSensorSchema
+);
+
+export const TemperatureSensorReading = mongoose.model(
+  "temperature",
+  temperatureSensorSchema
+);
+
+export const connectMongo = async (uri) => {
+  try {
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ MongoDB connected");
+  } catch (err) {
+    console.error("❌ MongoDB connection failed:", err);
+    process.exit(1);
+  }
+};

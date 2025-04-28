@@ -11,6 +11,10 @@ app.use(express.json());
 // Routes
 app.use("/api/sensors", sensorRoutes);
 
+app.get("/health", (req, res) => {
+  res.send("Server is healthy! 🚀");
+});
+
 // Start server after DB connection
 const startServer = async () => {
   await connectMongo(process.env.MONGO_URI);

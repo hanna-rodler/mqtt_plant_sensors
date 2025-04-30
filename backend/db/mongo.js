@@ -2,16 +2,25 @@ import mongoose from "mongoose";
 
 const lightSensorSchema = new mongoose.Schema({
   light: Number,
+  device: String,
   timestamp: { type: Date, default: Date.now },
 });
 
 const moistureSensorSchema = new mongoose.Schema({
   moisture: Number,
+  device: String,
   timestamp: { type: Date, default: Date.now },
 });
 
 const temperatureSensorSchema = new mongoose.Schema({
   temperature: Number,
+  device: String,
+  timestamp: { type: Date, default: Date.now },
+});
+
+const humiditySensorSchema = new mongoose.Schema({
+  temperature: Number,
+  device: String,
   timestamp: { type: Date, default: Date.now },
 });
 
@@ -24,6 +33,11 @@ export const MoistureSensorReading = mongoose.model(
 
 export const TemperatureSensorReading = mongoose.model(
   "temperature",
+  temperatureSensorSchema
+);
+
+export const HumiditySensorReading = mongoose.model(
+  "humidity",
   temperatureSensorSchema
 );
 

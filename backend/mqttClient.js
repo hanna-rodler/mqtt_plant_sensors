@@ -2,6 +2,7 @@ import mqtt from "mqtt";
 import {
   LightSensorReading,
   MoistureSensorReading,
+  HumiditySensorReading,
   TemperatureSensorReading,
 } from "./db/mongo.js";
 import dotenv from "dotenv";
@@ -22,23 +23,7 @@ client.on("connect", () => {
   client.subscribe("sensors/+/light");
   client.subscribe("sensors/+/moisture");
   client.subscribe("sensors/+/temperature");
-  client.subscribe("sensors/+/humidty");
-
-  const message = JSON.stringify({ light: 532 });
-
-  // Publish the message to the topic "sensors/device1/temperature"
-  const device = "device1";
-  const topic = `sensors/${device}/light`;
-  client.publish(topic, message, (err) => {
-    if (err) {
-      console.log("❌ Error publishing:", err);
-    } else {
-      console.log("✅ Message published to ".topic);
-    }
-
-    // After publishing, disconnect the client
-    // client.end();
-  });
+  client.subscribe("sensors/+/humidity");
 });
 
 client.on("message", async (topic, message) => {
@@ -53,47 +38,47 @@ client.on("message", async (topic, message) => {
     let deviceId = topic.split("/")[1]; // Extract device ID from the topic
 
     let reading;
-    // if (topic.match(/sensors\/([^/]+)\/light/)) {
-    //   console.log("Light message received:");
-    //   reading = new LightSensorReading({
-    //     light: payload.light,
-    //     device: deviceId,
-    //   });
-    // TODO: publish on/off based on light level
-    // const message = JSON.stringify({ state: "on" });
+    if (topic.match(/sensors\/([^/]+)\/light/)) {
+      console.log("Light message received:", message.toString());
+      reading = new LightSensorReading({
+        light: message.toString(),
+        device: deviceId,
+      });
+      // TODO: publish on/off based on light level
+      // const message = JSON.stringify({ state: "on" });
 
-    // // Publish the message to the topic "sensors/device1/temperature"
-    // const device = "device1";
-    // const topic = `commands/${device}/lightbulb`;
-    // client.publish(topic, message, (err) => {
-    //   if (err) {
-    //     console.log("❌ Error publishing:", err);
-    //   } else {
-    //     console.log("✅ Message published to ".topic);
-    //   }
+      // const device = "device1";
+      // const topic = `commands/${device}/lightbulb`;
+      // client.publish(topic, message, (err) => {
+      //   if (err) {
+      //     console.log("❌ Error publishing:", err);
+      //   } else {
+      //     console.log("✅ Message published to ".topic);
+      //   }
 
-    //   // After publishing, disconnect the client
-    //   // client.end();
-    // });
-    // } else if (topic.match(/sensors\/([^/]+)\/moisture/)) {
-    //   console.log("Moisture message received:", payload);
-    //   reading = new MoistureSensorReading({
-    //     moisture: payload.moisture,
-    //     device: deviceId,
-    //   });
-    // } else
-    if (topic.match(/sensors\/([^/]+)\/temperature/)) {
-      console.log("Temperature message received:", message);
+      //   // After publishing, disconnect the client
+      //   // client.end();
+      // });
+    } else if (topic.match(/sensors\/([^/]+)\/moisture/)) {
+      console.log("Moisture message received:", message.toString());
+      reading = new MoistureSensorReading({
+        moisture: message.toString(),
+        device: deviceId,
+      });
+    } else if (topic.match(/sensors\/([^/]+)\/temperature/)) {
+      const raw = message.toString();
+      const payload = JSON.parse(raw);
+      console.log("Temperature message received:", message.toString());
       reading = new TemperatureSensorReading({
         temperature: message.toString(),
         device: deviceId,
       });
-      // } else if (topic.match(/sensors\/([^/]+)\/temperature/)) {
-      //   console.log("Temperature message received:", message);
-      //   reading = new TemperatureSensorReading({
-      //     temperature: message.toString(),
-      //     device: deviceId,
-      //   });
+    } else if (topic.match(/sensors\/([^/]+)\/humidity/)) {
+      console.log("Temperature message received:", message.toString());
+      reading = new HumiditySensorReading({
+        temperature: message.toString(),
+        device: deviceId,
+      });
     } else {
       console.log("Unknown topic:", topic);
       return;

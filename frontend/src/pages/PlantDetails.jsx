@@ -6,11 +6,26 @@ import HistoryChart from "../components/HistoryChart";
 import '../App.css';
 
 const exampleDataMoisture = [
-    { timestamp: '10:00', moisture: 450 },
-    { timestamp: '11:00', moisture: 470 },
-    { timestamp: '12:00', moisture: 430 },
-    { timestamp: '13:00', moisture: 420 },
+    // Last week
+    { timestamp: '2025-04-28T12:00:00', moisture: 470 },
+    { timestamp: '2025-04-29T12:00:00', moisture: 460 },
+    { timestamp: '2025-04-30T12:00:00', moisture: 450 },
+    { timestamp: '2025-05-01T12:00:00', moisture: 440 },
+    { timestamp: '2025-05-02T12:00:00', moisture: 430 },
+    { timestamp: '2025-05-03T12:00:00', moisture: 420 },
+    { timestamp: '2025-05-04T12:00:00', moisture: 410 },
+
+    // This week (today is assumed to be 2025-05-05)
+    { timestamp: '2025-05-05T08:00:00', moisture: 430 },
+    { timestamp: '2025-05-05T09:00:00', moisture: 450 },
+    { timestamp: '2025-05-05T10:00:00', moisture: 400 },
+    { timestamp: '2025-05-05T11:00:00', moisture: 420 },
+    { timestamp: '2025-05-05T12:00:00', moisture: 440 },
+
 ];
+
+
+
 
 const PlantDetail = () => {
     const { id } = useParams();

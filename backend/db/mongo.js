@@ -24,6 +24,12 @@ const humiditySensorSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
+const lightCommandSchema = new mongoose.Schema({
+  status: ["on", "off"],
+  device: String,
+  timestamp: { type: Date, default: Date.now },
+});
+
 export const LightSensorReading = mongoose.model("light", lightSensorSchema);
 
 export const MoistureSensorReading = mongoose.model(
@@ -38,8 +44,10 @@ export const TemperatureSensorReading = mongoose.model(
 
 export const HumiditySensorReading = mongoose.model(
   "humidity",
-  temperatureSensorSchema
+  humiditySensorSchema
 );
+
+export const LightCommand = mongoose.model("lightCommands", lightCommandSchema);
 
 export const connectMongo = async (uri) => {
   try {

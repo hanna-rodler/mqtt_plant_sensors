@@ -40,6 +40,7 @@ client.on("message", async (topic, message) => {
     let reading;
     if (topic.match(/sensors\/([^/]+)\/light/)) {
       console.log("Light message received:", message.toString());
+      const light = message.toString();
       reading = new LightSensorReading({
         light: message.toString(),
         device: deviceId,
@@ -47,18 +48,29 @@ client.on("message", async (topic, message) => {
       // TODO: publish on/off based on light level
       // const message = JSON.stringify({ state: "on" });
 
-      // const device = "device1";
-      // const topic = `commands/${device}/lightbulb`;
-      // client.publish(topic, message, (err) => {
-      //   if (err) {
-      //     console.log("❌ Error publishing:", err);
-      //   } else {
-      //     console.log("✅ Message published to ".topic);
-      //   }
+      const topic = `commands/${deviceId}/lightbulb`;
+      client.publish(topic, message, (err) => {
+        if (err) {
+          console.log("❌ Error publishing:", err);
+        } else {
+          console.log("✅ Message published to ".topic);
+          if (light.toNumber() > 100) {
+            const lightCommand = new LightCommand({
+              status: "on",
+              device: deviceId,
+            });
+          } else {
+            const lightCommand = new LightCommand({
+              status: "off",
+              device: deviceId,
+            });
+          }
+          lightCommand.save();
+          console.log("💾 Saved light command to MongoDB");
+        }
 
-      //   // After publishing, disconnect the client
-      //   // client.end();
-      // });
+        // After publishing, disconnect the client
+      });
     } else if (topic.match(/sensors\/([^/]+)\/moisture/)) {
       console.log("Moisture message received:", message.toString());
       reading = new MoistureSensorReading({

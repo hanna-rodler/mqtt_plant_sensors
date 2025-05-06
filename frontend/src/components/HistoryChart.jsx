@@ -12,6 +12,24 @@ const now = dayjs();
 
 const HistoryChart = ({ title, data, dataKey }) => {
     const [range, setRange] = useState('today'); // 'today' | 'thisWeek' | 'lastWeek'
+    async function getTodayData(deviceId) {
+        try {
+            const response = await fetch(
+            `http://localhost:3001/api/sensors/${dataKey}/${deviceId}/${range.toLowerCase()}`
+            );
+            if (!response.ok || response.status !== 200) {
+                throw new Error("Failed to fetch light status");
+            }
+            const data = await response.json();
+            return data;
+        } catch (error) {
+            console.error("Error fetching light status:", error);
+            return null; // or some default value
+        }
+    }
+    getTodayData("plant1").then((data) => {
+        console.log(`data for ${dataKey}:`, data);
+    });
 
     const filterData = useMemo(() => {
         return data.filter(entry => {

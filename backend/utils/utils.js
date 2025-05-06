@@ -56,7 +56,7 @@ export async function calcAverageLight(deviceId, day) {
         }
         return lightAvg;
       }
-      return { message: "No average " };
+      return { avg: null };
     } catch (err) {
       return { error: "Failed to calculate average light", status: 500 };
     }
@@ -110,7 +110,7 @@ export async function calcAverageTemperature(deviceId, day) {
         }
         return sensorAvg;
       }
-      return { message: "No average " };
+      return { avg: null };
     } catch (err) {
       return { error: "Failed to calculate average temperature", status: 500 };
     }
@@ -168,7 +168,7 @@ export async function calcAverageMoisture(deviceId, day) {
         }
         return sensorAvg;
       }
-      return { message: "No average " };
+      return { avg: null };
     } catch (err) {
       return { error: "Failed to calculate average temperature", status: 500 };
     }
@@ -223,7 +223,7 @@ export async function calcAverageHumidity(deviceId, day) {
         }
         return sensorAvg;
       }
-      return { message: "No average " };
+      return { avg: null };
     } catch (err) {
       return { error: "Failed to calculate average temperature", status: 500 };
     }

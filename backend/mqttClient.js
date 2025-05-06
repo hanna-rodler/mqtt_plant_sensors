@@ -120,7 +120,7 @@ client.on("message", async (topic, message) => {
     } else if (topic.match(/sensors\/([^/]+)\/humidity/)) {
       console.log("Temperature message received:", message.toString());
       reading = new HumiditySensorReading({
-        temperature: message.toString(),
+        humidity: message.toString(),
         device: deviceId,
       });
     } else {

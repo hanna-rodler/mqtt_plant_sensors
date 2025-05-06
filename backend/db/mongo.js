@@ -7,7 +7,7 @@ const lightSensorSchema = new mongoose.Schema({
 });
 
 const lightAvgSchema = new mongoose.Schema({
-  avgLight: Number,
+  avg: Number,
   device: String,
   timestamp: Date,
 });
@@ -19,7 +19,7 @@ const moistureSensorSchema = new mongoose.Schema({
 });
 
 const moistureAvg = new mongoose.Schema({
-  avgMoisture: Number,
+  avg: Number,
   device: String,
   timestamp: { type: Date, default: Date.now },
 });
@@ -43,7 +43,7 @@ const humiditySensorSchema = new mongoose.Schema({
 });
 
 const humidityAvg = new mongoose.Schema({
-  avgHumidity: Number,
+  avg: Number,
   device: String,
   timestamp: { type: Date, default: Date.now },
 });

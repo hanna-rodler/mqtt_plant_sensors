@@ -252,33 +252,14 @@ router.get("/moistures/:deviceId/today", async (req, res) => {
   res.json(data);
 });
 
-router.get("/moistures/:deviceId/average", async (req, res) => {
-  const { deviceId } = req.params;
-  const today = new Date();
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-
-  try {
-    const result = await MoistureSensorReading.aggregate([
-      {
-        $match: {
-          device: deviceId,
-          timestamp: { $gte: startOfDay, $lte: endOfDay },
-        },
-      },
-      {
-        $group: {
-          _id: null,
-          averageMoisture: { $avg: "$moisture" },
-        },
-      },
-    ]);
-
-    const average = result.length > 0 ? result[0].averageMoisture : null;
-    res.json({ averageMoisture: average });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to calculate average moisture" });
+router.get("/moistures/:deviceId/:day/average", async (req, res) => {
+  // reject if req.params.day is not a valid date
+  const { deviceId, day } = req.params;
+  const avg = await calcAverageMoisture(deviceId, day);
+  if (avg.error) {
+    return res.status(avg.status).json({ error: avg.error });
   }
+  res.json(avg);
 });
 
 router.get("/moistures/:deviceId/thisweek", async (req, res) => {
@@ -300,7 +281,7 @@ router.get("/moistures/:deviceId/thisweek", async (req, res) => {
   res.json(weeklyAvgs);
 });
 
-router.get("/temperatures/:deviceId/lastweek", async (req, res) => {
+router.get("/moistures/:deviceId/lastweek", async (req, res) => {
   try {
     const { deviceId } = req.params;
     const lastWeekStart = getLastWeekDates();
@@ -310,7 +291,7 @@ router.get("/temperatures/:deviceId/lastweek", async (req, res) => {
       // iterate through the days of the week
       const currentDay = new Date(lastWeekStart);
       currentDay.setDate(lastWeekStart.getDate() + day);
-      const avgTemp = await calcAverageTemperature(deviceId, currentDay);
+      const avgTemp = await calcAverageMoisture(deviceId, currentDay);
       if (!avgTemp.error) {
         weeklyAvgs.push(avgTemp);
       }

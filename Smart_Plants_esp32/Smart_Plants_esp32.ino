@@ -11,18 +11,19 @@ const char* password = "smartplant"; // Enter your Hotspot Password here
 // --- ------------------------------------------ ---
 
 // --- MQTT Broker Configuration  ---
-const char* mqtt_server = "9e404e4cabd74dd6b618e22764c52e5c.s1.eu.hivemq.cloud"; // Z.B. "192.168.1.100" oder "test.mosquitto.org"
-// const char* mqtt_server = "broker.hivemq.com";
+const char* mqtt_server = "9e404e4cabd74dd6b618e22764c52e5c.s1.eu.hivemq.cloud"; 
 const int mqtt_port = 8883; // Standard MQTT Port (verschlüsselt)
 const char* mqtt_user = "planter";
 const char* mqtt_password = "planterCoNnect5789103tomeFun";
 const char* mqtt_client_id = "SmartPlantClient"; // Eindeutige Client-ID
 
 // --- MQTT Topics ---
-const char* topic_temperature = "sensors/plant1/temperature";
-const char* topic_humidity = "sensors/plant1/humidity";
-const char* topic_light = "sensors/plant1/light";
-const char* topic_moisture = "sensors/plant1/moisture";
+const char* topic_temperature = "sensors/plant2/temperature";
+const char* topic_humidity = "sensors/plant2/humidity";
+const char* topic_light = "sensors/plant2/light";
+const char* topic_moisture = "sensors/plant2/moisture";
+const char* topic_lightcontrol = "smartplant/lightcontrol";
+const char* topic_light_temperature = "smartplant/lighttemperature";
 
 // --- MQTT Client Setup ---
 WiFiClientSecure espClient; // Netzwerk-Client für MQTT
@@ -45,9 +46,11 @@ const int LIGHT_DARK_VALUE = 858;
 const int LIGHT_BRIGHT_VALUE = 4095; 
 // --- -------------------------------------------------------------------- ---
 
+bool light_on = false;
+
 // --- Timing Configuration ---
 #define PUBLISH_INTERVAL_MINUTES 1 // Sende alle X Minuten (1 oder 5)
-const long publishIntervalMillis = PUBLISH_INTERVAL_MINUTES * 6000; // * 1000; // Umrechnung in Millisekunden
+const long publishIntervalMillis = PUBLISH_INTERVAL_MINUTES * 60 * 300; // Umrechnung in Millisekunden
 unsigned long lastPublishTime = 0; // Zeitstempel des letzten Sendens
 
 // Helper function to connect to WiFi
@@ -87,8 +90,7 @@ void connectMQTT() {
         Serial.print("Attempting MQTT connection...");
         // Wenn mit Benutzername/Passwort:
         if (mqttClient.connect(mqtt_client_id, mqtt_user, mqtt_password)) {
-        // Wenn ohne Benutzername/Passwort:
-        // if (mqttClient.connect(mqtt_client_id)) {
+        // if (mqttClient.connect(mqtt_client_id)) { // Wenn ohne Benutzername/Passwort
             Serial.println("connected");
             // Hier könnten Topics abonniert werden, falls nötig:
             // mqttClient.subscribe("ein/topic");
@@ -118,6 +120,8 @@ void setup() {
     dht.begin();
     Serial.println("Setup complete. Starting readings...");
     Serial.println("===========================================");
+
+    mqttClient.publish(topic_lightcontrol,  "{\"state\": \"OFF\"}");
 }
 
 
@@ -155,6 +159,9 @@ void loop() {
 
         long moisturePercent = map(moistureRaw, MOISTURE_DRY_VALUE, MOISTURE_WET_VALUE, 0, 100);
         moisturePercent = constrain(moisturePercent, 0, 100);
+
+        int light_temp = map(temperature, -10, 50, 0 , 254);
+        light_temp = constrain(light_temp, 0, 254);
 
         // --- Check for valid DHT readings ---
         if (isnan(humidity) || isnan(temperature)) {
@@ -204,24 +211,22 @@ void loop() {
             Serial.println("  Failed to publish Moisture");
         }
 
+        String light_color = String("{\"color_temp\": \"") + light_temp + "\"}";                       
+
+        if(lightPercent<=60){
+            mqttClient.publish(topic_lightcontrol, "{\"state\": \"ON\"}");
+            mqttClient.publish(topic_light_temperature, light_color.c_str());
+            Serial.println("Light ON"); 
+            Serial.print("Light temperature");
+            Serial.println(light_color);
+            light_on = true;
+        }else{
+            mqttClient.publish(topic_lightcontrol,  "{\"state\": \"OFF\"}");
+            Serial.print("Light OFF"); 
+            light_on = false;
+        }
+
         Serial.println("-------------------------------------------");
 
     }
-    
 }
-
-// Optional: Callback Funktion für eingehende MQTT Nachrichten (wenn du 'setCallback' verwendest)
-/*
-void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  String message;
-  for (int i = 0; i < length; i++) {
-    message += (char)payload[i];
-  }
-  Serial.println(message);
-
-  // Hier könntest du auf Nachrichten reagieren, z.B. Einstellungen ändern
-}
-*/

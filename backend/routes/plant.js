@@ -1,6 +1,6 @@
 import express from "express";
 import {
-    LightSensorReading,
+    LightSensorReading, PlantResultReading,
     PlantStatusReading
 } from "../db/mongo.js";
 
@@ -30,5 +30,15 @@ router.get("/plants/:plantId/status", async (req, res) => {
         .limit(1);
     res.json(data);
 });
+
+
+// GET latest plant result readings from a specific plant
+router.get("/plants/:plantId/result", async (req, res) => {
+    const data = await PlantResultReading.find({ plant: req.params.plantId })
+        .sort({ timestamp: -1 })
+        .limit(1);
+    res.json(data);
+});
+
 
 export default router;

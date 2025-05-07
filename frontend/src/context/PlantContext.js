@@ -5,7 +5,8 @@ import {
     fetchLightByDeviceId,
     fetchHumidityByDeviceId,
     sendPlantStatus,
-    fetchStatusByPlantId
+    fetchStatusByPlantId,
+    fetchResultByPlantId,
 } from '../api';
 
 const PlantContext = createContext();
@@ -18,14 +19,12 @@ export const PlantProvider = ({ children }) => {
             id: '1',
             name: 'Plant 1',
             deviceId: 'device1',
-            score: 70,
             image: '/images/plant1.jpg',
         },
         {
             id: '2',
             name: 'Plant 2',
             deviceId: 'device2',
-            score: 88,
             image: '/images/plant2.jpeg',
         },
     ]);
@@ -36,12 +35,13 @@ export const PlantProvider = ({ children }) => {
                 console.log("Hole Daten für:", plant.deviceId);
                 const plantId = "plant" + plant.id;
                 try {
-                    const [moisture, temperature, light, humidity, status] = await Promise.all([
+                    const [moisture, temperature, light, humidity, status, score] = await Promise.all([
                         fetchMoistureByDeviceId(plant.deviceId),
                         fetchTemperatureByDeviceId(plant.deviceId),
                         fetchLightByDeviceId(plant.deviceId),
                         fetchHumidityByDeviceId(plant.deviceId),
-                        fetchStatusByPlantId(plantId)
+                        fetchStatusByPlantId(plantId),
+                        fetchResultByPlantId(plantId),
                     ]);
 
                     console.log('Erhaltene Werte für', plant.name, {
@@ -50,6 +50,7 @@ export const PlantProvider = ({ children }) => {
                         light,
                         humidity,
                         status,
+                        score,
                     });
 
 
@@ -60,6 +61,7 @@ export const PlantProvider = ({ children }) => {
                         light: light[0]?.light ?? null,
                         humidity: humidity[0]?.humidity ?? null,
                         status: status[0]?.status ?? null,
+                        score: score[0]?.score ?? null,
                     };
 
                 } catch (error) {
@@ -96,8 +98,7 @@ export const PlantProvider = ({ children }) => {
         }
     };
 
-    // Optional: PATCH an API senden
-  };
+
 
     return (
         <PlantContext.Provider value={{ plants, updatePlantStatus }}>

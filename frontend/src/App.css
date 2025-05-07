@@ -170,6 +170,10 @@
   text-align: left;
 }
 
+.plant-card-big-data h2{
+  margin-top: 10px;
+}
+
 .plant-card-big-details {
   font-weight: 450;
 }

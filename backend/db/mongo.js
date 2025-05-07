@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 
+const plantStatusSchema = new mongoose.Schema({
+  status: String,
+  plant: String,
+  timestamp: { type: Date, default: Date.now },
+});
+
 const lightSensorSchema = new mongoose.Schema({
   light: Number,
   device: String,
@@ -29,6 +35,9 @@ const lightCommandSchema = new mongoose.Schema({
   device: String,
   timestamp: { type: Date, default: Date.now },
 });
+
+export const PlantStatusReading = mongoose.model("PlantStatus", plantStatusSchema, "plant_status");
+
 
 export const LightSensorReading = mongoose.model("light", lightSensorSchema);
 

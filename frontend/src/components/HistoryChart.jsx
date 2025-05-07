@@ -12,7 +12,8 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
   useEffect(() => {
     async function fetchHistoryData() {
       try {
-        const url = `http://localhost:3001/api/sensors/${endpointKey}/${deviceId}/${range.toLowerCase()}`;
+        const url = `${process.env.REACT_APP_API_BASE_URL}/sensors/${endpointKey}/${deviceId}/${range.toLowerCase()}`;
+        console.log('Fetching data from:', url);
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Fetch failed for ${endpointKey}`);
         const data = await response.json();
@@ -22,13 +23,10 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
         const validCount = data.filter((item) => item.avg !== null).length;
         
         if(validCount > 2) {
-            console.log('DO NOT SHOW', validCount);
             setShowDataPoints(false);
         } else {
-            console.log('DO SHOW', validCount);
             setShowDataPoints(true);
         }
-        console.log('show data points ', showDataPoints, ' : ', validCount);
         if(allNull) {
             setHistoryData([]);
         } else {

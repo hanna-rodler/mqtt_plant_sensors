@@ -1,4 +1,4 @@
-import {createContext, useEffect, useState} from 'react';
+import { createContext, useEffect, useState } from "react";
 import {
     fetchMoistureByDeviceId,
     fetchTemperatureByDeviceId,
@@ -10,8 +10,6 @@ import {
 } from '../api';
 
 const PlantContext = createContext();
-
-
 
 export const PlantProvider = ({ children }) => {
     const [plants, setPlants] = useState([
@@ -74,37 +72,37 @@ export const PlantProvider = ({ children }) => {
         setPlants(updated);
     };
 
-    useEffect(() => {
-        fetchSensorData();
-    }, []);
 
-    const updatePlantStatus = async (id, newStatus) => {
-        setPlants((prev) =>
-            prev.map((p) =>
-                p.id === id ? { ...p, status: newStatus } : p
-            )
-        );
+    setPlants(updated);
+  };
 
-        const plant = plants.find(p => p.id === id);
-        if (!plant) return;
+  useEffect(() => {
+    fetchSensorData();
+  }, []);
 
-        const plantId = "plant" + plant.id;
-
-        try {
-            await sendPlantStatus(plantId, newStatus);
-            console.log("Status gespeichert für", plant.name);
-        } catch (err) {
-            console.error("Fehler beim Senden an die DB:", err);
-        }
-    };
-
-
-
-    return (
-        <PlantContext.Provider value={{ plants, updatePlantStatus }}>
-            {children}
-        </PlantContext.Provider>
+  const updatePlantStatus = async (id, newStatus) => {
+    setPlants((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
     );
+
+    const plant = plants.find((p) => p.id === id);
+    if (!plant) return;
+
+    const plantId = "plant" + plant.id;
+
+    try {
+      await sendPlantStatus(plantId, newStatus);
+      console.log("Status gespeichert für", plant.name);
+    } catch (err) {
+      console.error("Fehler beim Senden an die DB:", err);
+    }
+  };
+
+  return (
+    <PlantContext.Provider value={{ plants, updatePlantStatus }}>
+      {children}
+    </PlantContext.Provider>
+  );
 };
 
 export default PlantContext;

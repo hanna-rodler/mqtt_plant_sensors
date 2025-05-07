@@ -73,10 +73,7 @@ client.on("message", async (topic, message) => {
         light: message.toString(),
         device: deviceId,
       });
-      // TODO: publish on/off based on light level
-      // const message = JSON.stringify({ state: "on" });
 
-      // const topic = `smartplant/${deviceId}/lightbulb`;
       const topic = `smartplant/lightcontrol`;
       client.publish(topic, message, (err) => {
         if (err) {

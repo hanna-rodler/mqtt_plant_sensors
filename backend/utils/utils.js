@@ -8,7 +8,7 @@ import {
   MoistureAvg,
   HumidityAvg,
 } from "../db/mongo.js";
-import { startOfWeek } from "date-fns";
+import { startOfWeek, isToday, isYesterday } from "date-fns";
 
 export async function calcAverageLight(deviceId, day) {
   const date = new Date(day);
@@ -22,10 +22,16 @@ export async function calcAverageLight(deviceId, day) {
     device: deviceId,
     timestamp: { $gte: startOfDay, $lte: endOfDay },
   });
-  if (existingAvg && existingAvg.avg !== null) {
+  if (
+    existingAvg &&
+    existingAvg.avg !== null &&
+    !isToday(date) &&
+    !isYesterday(date)
+  ) {
     return existingAvg;
   } else {
     try {
+      console.log("Looking for light average ", date);
       const result = await LightSensorReading.aggregate([
         {
           $match: {
@@ -42,21 +48,18 @@ export async function calcAverageLight(deviceId, day) {
       ]);
 
       const average = result.length > 0 ? result[0].averageLight : null;
-      if (average !== null) {
-        const lightAvg = new LightAvg({
-          avg: average,
-          device: deviceId,
-          timestamp: date,
-        });
-        try {
-          lightAvg.save();
-          console.log("💾 Saved light average to MongoDB");
-        } catch (err) {
-          console.error("❌ Error saving light average to MongoDB:", err);
-        }
-        return lightAvg;
+      const lightAvg = new LightAvg({
+        avg: average,
+        device: deviceId,
+        timestamp: date,
+      });
+      try {
+        lightAvg.save();
+        console.log("💾 Saved light average to MongoDB");
+      } catch (err) {
+        console.error("❌ Error saving light average to MongoDB:", err);
       }
-      return { avg: null };
+      return lightAvg;
     } catch (err) {
       return { error: "Failed to calculate average light", status: 500 };
     }
@@ -75,7 +78,12 @@ export async function calcAverageTemperature(deviceId, day) {
     device: deviceId,
     timestamp: { $gte: startOfDay, $lte: endOfDay },
   });
-  if (existingAvg && existingAvg.avg !== null) {
+  if (
+    existingAvg &&
+    existingAvg.avg !== null &&
+    !isToday(date) &&
+    !isYesterday(date)
+  ) {
     console.log("Found existing average:", existingAvg);
     return existingAvg;
   } else {
@@ -96,21 +104,18 @@ export async function calcAverageTemperature(deviceId, day) {
       ]);
 
       const average = result.length > 0 ? result[0].avg : null;
-      if (average !== null) {
-        const sensorAvg = new TemperatureAvg({
-          avg: average,
-          device: deviceId,
-          timestamp: date,
-        });
-        try {
-          sensorAvg.save();
-          console.log("💾 Saved temperature average to MongoDB");
-        } catch (err) {
-          console.error("❌ Error saving temperature average to MongoDB:", err);
-        }
-        return sensorAvg;
+      const sensorAvg = new TemperatureAvg({
+        avg: average,
+        device: deviceId,
+        timestamp: date,
+      });
+      try {
+        sensorAvg.save();
+        console.log("💾 Saved temperature average to MongoDB");
+      } catch (err) {
+        console.error("❌ Error saving temperature average to MongoDB:", err);
       }
-      return { avg: null };
+      return sensorAvg;
     } catch (err) {
       return { error: "Failed to calculate average temperature", status: 500 };
     }
@@ -129,7 +134,13 @@ export async function calcAverageMoisture(deviceId, day) {
     device: deviceId,
     timestamp: { $gte: startOfDay, $lte: endOfDay },
   });
-  if (existingAvg && existingAvg.avg && existingAvg.avg !== null) {
+  if (
+    existingAvg &&
+    existingAvg.avg &&
+    existingAvg.avg !== null &&
+    !isToday(date) &&
+    !isYesterday(date)
+  ) {
     console.log("Found existing average:", existingAvg);
     return existingAvg;
   } else {
@@ -151,24 +162,21 @@ export async function calcAverageMoisture(deviceId, day) {
       ]);
 
       const average = result.length > 0 ? result[0].avg : null;
-      if (average !== null) {
-        const sensorAvg = new MoistureAvg({
-          avg: average,
-          device: deviceId,
-          timestamp: date,
-        });
-        try {
-          if (sensorAvg.avg !== null) {
-            sensorAvg.save();
-            console.log("💾 Saved temperature average to MongoDB");
-          } else {
-          }
-        } catch (err) {
-          console.error("❌ Error saving temperature average to MongoDB:", err);
+      const sensorAvg = new MoistureAvg({
+        avg: average,
+        device: deviceId,
+        timestamp: date,
+      });
+      try {
+        if (sensorAvg.avg !== null) {
+          sensorAvg.save();
+          console.log("💾 Saved temperature average to MongoDB");
+        } else {
         }
-        return sensorAvg;
+      } catch (err) {
+        console.error("❌ Error saving temperature average to MongoDB:", err);
       }
-      return { avg: null };
+      return sensorAvg;
     } catch (err) {
       return { error: "Failed to calculate average temperature", status: 500 };
     }
@@ -187,7 +195,13 @@ export async function calcAverageHumidity(deviceId, day) {
     device: deviceId,
     timestamp: { $gte: startOfDay, $lte: endOfDay },
   });
-  if (existingAvg && existingAvg.avg && existingAvg.avg !== null) {
+  if (
+    existingAvg &&
+    existingAvg.avg &&
+    existingAvg.avg !== null &&
+    !isToday(date) &&
+    !isYesterday(date)
+  ) {
     console.log("Found existing average:", existingAvg);
     return existingAvg;
   } else {
@@ -209,21 +223,18 @@ export async function calcAverageHumidity(deviceId, day) {
       ]);
 
       const average = result.length > 0 ? result[0].avg : null;
-      if (average !== null) {
-        const sensorAvg = new HumidityAvg({
-          avg: average,
-          device: deviceId,
-          timestamp: date,
-        });
-        try {
-          sensorAvg.save();
-          console.log("💾 Saved temperature average to MongoDB");
-        } catch (err) {
-          console.error("❌ Error saving temperature average to MongoDB:", err);
-        }
-        return sensorAvg;
+      const sensorAvg = new HumidityAvg({
+        avg: average,
+        device: deviceId,
+        timestamp: date,
+      });
+      try {
+        sensorAvg.save();
+        console.log("💾 Saved temperature average to MongoDB");
+      } catch (err) {
+        console.error("❌ Error saving temperature average to MongoDB:", err);
       }
-      return { avg: null };
+      return sensorAvg;
     } catch (err) {
       return { error: "Failed to calculate average temperature", status: 500 };
     }

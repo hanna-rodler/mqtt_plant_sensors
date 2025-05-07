@@ -1,48 +1,109 @@
-import { createContext, useState } from "react";
+import {createContext, useEffect, useState} from 'react';
+import {
+    fetchMoistureByDeviceId,
+    fetchTemperatureByDeviceId,
+    fetchLightByDeviceId,
+    fetchHumidityByDeviceId,
+    sendPlantStatus,
+    fetchStatusByPlantId
+} from '../api';
 
 const PlantContext = createContext();
 
-const initialPlants = [
-  {
-    id: "plant1",
-    name: "Plant 1",
-    moisture: 300,
-    humidity: 400,
-    light: 450,
-    temperature: 23,
-    status: "critical",
-    score: 60,
-    image: "/images/plant1.jpg",
-  },
-  {
-    id: "device1",
-    name: "Plant 2",
-    moisture: 600,
-    humidity: 300,
-    light: 700,
-    temperature: 22,
-    status: "healthy",
-    score: 92,
-    image: "/images/plant2.jpeg",
-  },
-];
+
 
 export const PlantProvider = ({ children }) => {
-  const [plants, setPlants] = useState(initialPlants);
+    const [plants, setPlants] = useState([
+        {
+            id: '1',
+            name: 'Plant 1',
+            deviceId: 'device1',
+            score: 70,
+            image: '/images/plant1.jpg',
+        },
+        {
+            id: '2',
+            name: 'Plant 2',
+            deviceId: 'device2',
+            score: 88,
+            image: '/images/plant2.jpeg',
+        },
+    ]);
 
-  const updatePlantStatus = (id, newStatus) => {
-    setPlants((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, status: newStatus } : p))
-    );
+    const fetchSensorData = async () => {
+        const updated = await Promise.all(
+            plants.map(async (plant) => {
+                console.log("Hole Daten für:", plant.deviceId);
+                const plantId = "plant" + plant.id;
+                try {
+                    const [moisture, temperature, light, humidity, status] = await Promise.all([
+                        fetchMoistureByDeviceId(plant.deviceId),
+                        fetchTemperatureByDeviceId(plant.deviceId),
+                        fetchLightByDeviceId(plant.deviceId),
+                        fetchHumidityByDeviceId(plant.deviceId),
+                        fetchStatusByPlantId(plantId)
+                    ]);
+
+                    console.log('Erhaltene Werte für', plant.name, {
+                        moisture,
+                        temperature,
+                        light,
+                        humidity,
+                        status,
+                    });
+
+
+                    return {
+                        ...plant,
+                        moisture: moisture[0]?.moisture ?? null,
+                        temperature: temperature[0]?.temperature ?? null,
+                        light: light[0]?.light ?? null,
+                        humidity: humidity[0]?.humidity ?? null,
+                        status: status[0]?.status ?? null,
+                    };
+
+                } catch (error) {
+                    console.error(`Fehler bei ${plant.name}:`, error);
+                    return plant;
+                }
+            })
+        );
+
+        setPlants(updated);
+    };
+
+    useEffect(() => {
+        fetchSensorData();
+    }, []);
+
+    const updatePlantStatus = async (id, newStatus) => {
+        setPlants((prev) =>
+            prev.map((p) =>
+                p.id === id ? { ...p, status: newStatus } : p
+            )
+        );
+
+        const plant = plants.find(p => p.id === id);
+        if (!plant) return;
+
+        const plantId = "plant" + plant.id;
+
+        try {
+            await sendPlantStatus(plantId, newStatus);
+            console.log("Status gespeichert für", plant.name);
+        } catch (err) {
+            console.error("Fehler beim Senden an die DB:", err);
+        }
+    };
 
     // Optional: PATCH an API senden
   };
 
-  return (
-    <PlantContext.Provider value={{ plants, updatePlantStatus }}>
-      {children}
-    </PlantContext.Provider>
-  );
+    return (
+        <PlantContext.Provider value={{ plants, updatePlantStatus }}>
+            {children}
+        </PlantContext.Provider>
+    );
 };
 
 export default PlantContext;

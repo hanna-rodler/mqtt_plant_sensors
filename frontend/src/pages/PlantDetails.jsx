@@ -1,9 +1,13 @@
 import { useParams } from 'react-router-dom';
-import { useContext } from 'react';
+import {useContext, useEffect, useState} from 'react';
 import PlantContext from '../context/PlantContext';
 import PlantCardBig from '../components/PlantCardBig';
 import HistoryChart from "../components/HistoryChart";
 import '../App.css';
+import {fetchMoistureHistoryByDeviceId,
+        fetchLightHistoryByDeviceId,
+        fetchHumidityHistoryByDeviceId,
+        fetchTemperatureHistoryByDeviceId} from "../api";
 
 const exampleDataMoisture = [
     // Last week
@@ -30,8 +34,22 @@ const exampleDataMoisture = [
 const PlantDetail = () => {
     const { id } = useParams();
     const { plants, updatePlantStatus } = useContext(PlantContext);
+    const [moistureHistory, setMoistureHistory] = useState([]);
+    const [humidityHistory, setHumidityHistory] = useState([]);
+    const [lightHistory, setLightHistory] = useState([]);
+    const [temperatureHistory, setTemperatureHistory] = useState([]);
+
 
     const selectedPlant = plants.find((p) => p.id === id);
+
+    useEffect(() => {
+        if (selectedPlant) {
+            fetchMoistureHistoryByDeviceId(selectedPlant.deviceId).then(setMoistureHistory);
+            fetchHumidityHistoryByDeviceId(selectedPlant.deviceId).then(setHumidityHistory);
+            fetchLightHistoryByDeviceId(selectedPlant.deviceId).then(setLightHistory);
+            fetchTemperatureHistoryByDeviceId(selectedPlant.deviceId).then(setTemperatureHistory);
+        }
+    }, [selectedPlant]);
 
     if (!selectedPlant) return <p>Pflanze nicht gefunden.</p>;
 
@@ -43,12 +61,11 @@ const PlantDetail = () => {
                     plant={selectedPlant}
                     onStatusChange={(newStatus) => updatePlantStatus(id, newStatus)}
                 />
-                <HistoryChart title="Moisture History" data={exampleDataMoisture} dataKey="moistures" />
-                <HistoryChart title="Humidity History" data={exampleDataMoisture} dataKey="humidities" />
-                <HistoryChart title="Light History" data={exampleDataMoisture} dataKey="lights" />
-                <HistoryChart title="Temperature History" data={exampleDataMoisture} dataKey="temperatures" />
-                <HistoryChart title="Status History" data={exampleDataMoisture} dataKey="moisture" />
-                <HistoryChart title="Score History" data={exampleDataMoisture} dataKey="moisture" />
+
+                <HistoryChart title="Moisture History" data={moistureHistory} dataKey="moisture" />
+                <HistoryChart title="Humidity History" data={humidityHistory} dataKey="humidity" />
+                <HistoryChart title="Light History" data={lightHistory} dataKey="light" />
+                <HistoryChart title="Temperature History" data={temperatureHistory} dataKey="temperature" />
             </div>
         </div>
     );

@@ -74,3 +74,9 @@ export const fetchStatusByPlantId = async (plantId) => {
     if (!res.ok) throw new Error("Failed to fetch status");
     return res.json();
 };
+
+export const fetchResultByPlantId = async (plantId) => {
+    const res = await fetch(`http://localhost:3001/api/plants/${plantId}/result`);
+    if (!res.ok) throw new Error("Failed to fetch result");
+    return res.json();
+};

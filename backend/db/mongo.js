@@ -62,6 +62,7 @@ const lightCommandSchema = new mongoose.Schema({
 
 export const PlantStatusReading = mongoose.model("PlantStatus", plantStatusSchema, "plant_status");
 
+export const PlantResultReading = mongoose.model("PlantResult", plantStatusSchema, "plant_results");
 
 export const LightSensorReading = mongoose.model("light", lightSensorSchema);
 

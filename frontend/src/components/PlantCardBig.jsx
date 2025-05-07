@@ -54,7 +54,7 @@ const PlantCardBig = ({ plant, onStatusChange }) => {
                         />
                     </p>
 
-                    <p className="plant-card-big-details">
+                    <div className="plant-card-big-details">
                         <strong>Score:</strong>
                         <ProgressBar
                             value={plant.score}
@@ -65,7 +65,7 @@ const PlantCardBig = ({ plant, onStatusChange }) => {
                                         '#76c442'
                             }
                         />
-                    </p>
+                    </div>
                 </div>
 
                 <img

@@ -1,128 +1,99 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+  LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
 import '../App.css';
-import { useMemo } from 'react';
-import dayjs from 'dayjs';
-import isoWeek from 'dayjs/plugin/isoWeek';
-dayjs.extend(isoWeek);
 
-const now = dayjs();
+const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
+  const [range, setRange] = useState('today'); // 'today' | 'thisWeek' | 'lastWeek'
+  const [historyData, setHistoryData] = useState([]);
+  const [showDataPoints, setShowDataPoints] = useState([]);
 
-const HistoryChart = ({ title, data, dataKey }) => {
-    const [range, setRange] = useState('today'); // 'today' | 'thisWeek' | 'lastWeek'
-    async function getTodayData(deviceId) {
-        try {
-            const response = await fetch(
-            `http://localhost:3001/api/sensors/${dataKey}/${deviceId}/${range.toLowerCase()}`
-            );
-            if (!response.ok || response.status !== 200) {
-                throw new Error("Failed to fetch light status");
-            }
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error("Error fetching light status:", error);
-            return null; // or some default value
+  useEffect(() => {
+    async function fetchHistoryData() {
+      try {
+        const url = `http://localhost:3001/api/sensors/${endpointKey}/${deviceId}/${range.toLowerCase()}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Fetch failed for ${endpointKey}`);
+        const data = await response.json();
+        // check if all data avgs are null
+        const allNull = data.every((item) => item.avg === null);
+        // count how many items are not null
+        const validCount = data.filter((item) => item.avg !== null).length;
+        
+        if(validCount > 2) {
+            console.log('DO NOT SHOW', validCount);
+            setShowDataPoints(false);
+        } else {
+            console.log('DO SHOW', validCount);
+            setShowDataPoints(true);
         }
+        console.log('show data points ', showDataPoints, ' : ', validCount);
+        if(allNull) {
+            setHistoryData([]);
+        } else {
+            setHistoryData(data);
+        }
+      } catch (error) {
+        console.error('Error fetching history data:', error);
+        setHistoryData([]);
+      }
     }
-    getTodayData("plant1").then((data) => {
-        console.log(`data for ${dataKey}:`, data);
-    });
 
-    const filterData = useMemo(() => {
-        return data.filter(entry => {
-            const time = dayjs(entry.timestamp);
+    fetchHistoryData();
+  }, [dataKey, range]);
 
-            if (range === 'today') {
-                return time.isSame(now, 'day');
-            }
-            if (range === 'thisWeek') {
-                return time.isSame(now, 'isoWeek');
-            }
-            if (range === 'lastWeek') {
-                return time.isSame(now.subtract(1, 'week'), 'isoWeek');
-            }
-            return true;
-        });
-    }, [data, range]);
+  return (
+    <div className="history-chart-container">
+      <div className="history-chart-header">
+        <h3 className="history-chart-title">{title}</h3>
+        <select
+          value={range}
+          onChange={(e) => setRange(e.target.value)}
+          className="history-chart-select"
+        >
+          <option value="today">Today</option>
+          <option value="thisWeek">This Week</option>
+          <option value="lastWeek">Last Week</option>
+        </select>
+      </div>
 
-
-    const filteredData = filterData;
-
-    return (
-        <div className="history-chart-container">
-            <div className="history-chart-header">
-                <h3 className="history-chart-title">{title}</h3>
-                <select
-                    value={range}
-                    onChange={(e) => setRange(e.target.value)}
-                    className="history-chart-select"
-                >
-                    <option value="today">Today</option>
-                    <option value="thisWeek">This Week</option>
-                    <option value="lastWeek">Last Week</option>
-                </select>
-            </div>
-
-            <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={filteredData}>
-                    <CartesianGrid stroke="#ccc" />
-                    <XAxis
-                        dataKey="timestamp"
-                        tickFormatter={(value) => {
-                            const date = new Date(value);
-
-                            if (range === 'today') {
-                                return date.toLocaleTimeString('de-DE', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                });
-                            } else {
-                                return date.toLocaleString('de-DE', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                });
-                            }
-                        }}
-                    />
-
-                    <YAxis />
-                    <Tooltip
-                        labelFormatter={(value) => {
-                            const date = new Date(value);
-
-                            if (range === 'today') {
-                                return date.toLocaleTimeString('de-DE', {
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                });
-                            } else {
-                                return date.toLocaleString('de-DE', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    hour: '2-digit',
-                                    minute: '2-digit',
-                                });
-                            }
-                        }}
-                    />
-
-
-                    <Line
-                        type="monotone"
-                        dataKey={dataKey}
-                        stroke="#93B756"
-                        strokeWidth={2}
-                        dot={false}
-                    />
-                </LineChart>
-            </ResponsiveContainer>
-        </div>
-    );
+      {historyData.length >= 1 ? (
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={historyData}>
+            <CartesianGrid stroke="#ccc" />
+            <XAxis
+              dataKey="timestamp"
+              tickFormatter={(value) => {
+                const date = new Date(value);
+                return range === 'today'
+                  ? date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                  : date.toLocaleString('de-DE', { day: '2-digit', month: '2-digit' });
+              }}
+            />
+            <YAxis />
+            <Tooltip
+              labelFormatter={(value) => {
+                const date = new Date(value);
+                return range === 'today'
+                  ? date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+                  : date.toLocaleString('de-DE', { day: '2-digit', month: '2-digit'});
+              }}
+            />
+            <Line
+              type="monotone"
+              dataKey={range === 'today' ? dataKey : 'avg'}
+              stroke="#912038"
+              strokeWidth={2}
+              dot={showDataPoints}
+            />
+          </LineChart>
+        </ResponsiveContainer>
+      ) : (
+        <p>No data to display</p>
+      )}
+    </div>
+  );
 };
 
 export default HistoryChart;

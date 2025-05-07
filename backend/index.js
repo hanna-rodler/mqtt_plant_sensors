@@ -9,13 +9,12 @@ import cors from "cors";
 dotenv.config();
 const app = express();
 
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://mqtt-plant-sensors.onrender.com',
-  ],
-  methods: ["GET", "POST"],
-}));
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "https://smart-plants-fe.onrender.com/"],
+    methods: ["GET", "POST"],
+  })
+);
 
 app.use(express.json());
 

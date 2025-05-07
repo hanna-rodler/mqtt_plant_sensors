@@ -1,13 +1,13 @@
 import { createContext, useEffect, useState } from "react";
 import {
-    fetchMoistureByDeviceId,
-    fetchTemperatureByDeviceId,
-    fetchLightByDeviceId,
-    fetchHumidityByDeviceId,
-    sendPlantStatus,
-    fetchStatusByPlantId,
-    fetchResultByPlantId,
-} from '../api';
+  fetchMoistureByDeviceId,
+  fetchTemperatureByDeviceId,
+  fetchLightByDeviceId,
+  fetchHumidityByDeviceId,
+  sendPlantStatus,
+  fetchStatusByPlantId,
+  fetchResultByPlantId,
+} from "../api";
 
 const PlantContext = createContext();
 
@@ -77,7 +77,6 @@ export const PlantProvider = ({ children }) => {
 
         setPlants(updated);
     };
-
 
 
   useEffect(() => {

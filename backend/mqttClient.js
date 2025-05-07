@@ -4,6 +4,7 @@ import {
   MoistureSensorReading,
   HumiditySensorReading,
   TemperatureSensorReading,
+  LightCommand,
 } from "./db/mongo.js";
 import dotenv from "dotenv";
 dotenv.config();
@@ -24,6 +25,33 @@ client.on("connect", () => {
   client.subscribe("sensors/+/moisture");
   client.subscribe("sensors/+/temperature");
   client.subscribe("sensors/+/humidity");
+
+  const message = JSON.stringify({ state: "OFF" });
+
+  const topic = `smartplant/lightcontrol`;
+  client.publish(topic, message, (err) => {
+    if (err) {
+      console.log("❌ Error publishing:", err);
+    } else {
+      console.log("✅ Message published to ".topic);
+      // convert string to number
+      const lightNum = parseInt(message.toString(), 10);
+      if (lightNum > 100) {
+        const lightCommand = new LightCommand({
+          status: "on",
+          device: "plant1",
+        });
+        lightCommand.save();
+      } else {
+        const lightCommand = new LightCommand({
+          status: "off",
+          device: "plant1",
+        });
+        lightCommand.save();
+      }
+      console.log("💾 Saved light command to MongoDB");
+    }
+  });
 });
 
 client.on("message", async (topic, message) => {
@@ -48,24 +76,28 @@ client.on("message", async (topic, message) => {
       // TODO: publish on/off based on light level
       // const message = JSON.stringify({ state: "on" });
 
-      const topic = `commands/${deviceId}/lightbulb`;
+      // const topic = `smartplant/${deviceId}/lightbulb`;
+      const topic = `smartplant/lightcontrol`;
       client.publish(topic, message, (err) => {
         if (err) {
           console.log("❌ Error publishing:", err);
         } else {
           console.log("✅ Message published to ".topic);
-          if (light.toNumber() > 100) {
+          // convert string to number
+          const lightNum = parseInt(message.toString(), 10);
+          if (lightNum > 100) {
             const lightCommand = new LightCommand({
               status: "on",
               device: deviceId,
             });
+            lightCommand.save();
           } else {
             const lightCommand = new LightCommand({
               status: "off",
               device: deviceId,
             });
+            lightCommand.save();
           }
-          lightCommand.save();
           console.log("💾 Saved light command to MongoDB");
         }
 
@@ -88,7 +120,7 @@ client.on("message", async (topic, message) => {
     } else if (topic.match(/sensors\/([^/]+)\/humidity/)) {
       console.log("Temperature message received:", message.toString());
       reading = new HumiditySensorReading({
-        temperature: message.toString(),
+        humidity: message.toString(),
         device: deviceId,
       });
     } else {

@@ -96,7 +96,8 @@ export const PlantProvider = ({ children }) => {
         }
     };
 
-
+    // Optional: PATCH an API senden
+  };
 
     return (
         <PlantContext.Provider value={{ plants, updatePlantStatus }}>

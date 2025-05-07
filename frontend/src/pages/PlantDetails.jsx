@@ -61,6 +61,7 @@ const PlantDetail = () => {
                     plant={selectedPlant}
                     onStatusChange={(newStatus) => updatePlantStatus(id, newStatus)}
                 />
+
                 <HistoryChart title="Moisture History" data={moistureHistory} dataKey="moisture" />
                 <HistoryChart title="Humidity History" data={humidityHistory} dataKey="humidity" />
                 <HistoryChart title="Light History" data={lightHistory} dataKey="light" />

@@ -7,8 +7,10 @@ import {
   TemperatureAvg,
   MoistureAvg,
   HumidityAvg,
+  ScoreAvg, PlantResultReading
 } from "../db/mongo.js";
 import { startOfWeek, isToday, isYesterday } from "date-fns";
+import Plant from "../routes/plant.js";
 
 export async function calcAverageLight(deviceId, day) {
   const date = new Date(day);
@@ -255,7 +257,77 @@ export function getLastWeekDates() {
 export function getThisWeekDates() {
   const today = new Date();
   const firstWeekDay = startOfWeek(today, { weekStartsOn: 1 });
+  console.log('firstWeekDay ', firstWeekDay);
   const endOfWeek = new Date(today.setHours(23, 59, 59, 999));
   const daysInCurrentWeek = endOfWeek.getDay();
   return { firstWeekDay: firstWeekDay, daysInCurrentWeek: daysInCurrentWeek };
+}
+
+export async function calcAverageScore(plantId, day) {
+  const date = new Date(day);
+  if (isNaN(date.getTime())) {
+    return { error: "Invalid date", status: 400 };
+  }
+
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+
+  const existingAvg = await ScoreAvg.findOne({
+    plant: plantId,
+    timestamp: { $gte: startOfDay, $lte: endOfDay },
+  });
+
+  if (
+      existingAvg &&
+      existingAvg.avg !== null &&
+      !isToday(date) &&
+      !isYesterday(date)
+  ) {
+    return existingAvg;
+  }
+
+  try {
+    const testRes = await PlantResultReading.findOne({plant: plantId});
+    console.log('testRes', testRes);
+    const result = await PlantResultReading.aggregate([
+      {
+        $match: {
+          plant: plantId,
+          evaluated_at: { $gte: startOfDay, $lte: endOfDay },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          averageScore: { $avg: "$score" },
+        },
+      },
+    ]);
+
+    console.log('result ', result);
+
+
+    const average = result.length > 0 ? result[0].averageScore : null;
+
+    const scoreAvg = new ScoreAvg({
+      avg: average,
+      plant: plantId,
+      timestamp: startOfDay,
+    });
+
+    try {
+      await scoreAvg.save();
+      console.log("💾 Saved score average to MongoDB");
+    } catch (err) {
+      console.error("❌ Error saving score average to MongoDB:", err);
+    }
+
+    return scoreAvg;
+  } catch (err) {
+    console.error("❌ Aggregation failed:", err);
+    return { error: "Failed to calculate average score", status: 500 };
+  }
 }

@@ -4,10 +4,7 @@ import PlantContext from '../context/PlantContext';
 import PlantCardBig from '../components/PlantCardBig';
 import HistoryChart from "../components/HistoryChart";
 import '../App.css';
-import {fetchMoistureHistoryByDeviceId,
-        fetchLightHistoryByDeviceId,
-        fetchHumidityHistoryByDeviceId,
-        fetchTemperatureHistoryByDeviceId} from "../api";
+
 
 
 const PlantDetail = () => {
@@ -31,6 +28,7 @@ const PlantDetail = () => {
                 <HistoryChart title="Humidity History" endpointKey="humidities" dataKey="humidity" deviceId={selectedPlant.deviceId}/>
                 <HistoryChart title="Light History" endpointKey="lights" dataKey="light" deviceId={selectedPlant.deviceId}/>
                 <HistoryChart title="Temperature History" endpointKey="temperatures" dataKey="temperature" deviceId={selectedPlant.deviceId}/>
+                <HistoryChart title="Score History" endpointKey="scores" dataKey="scores" deviceId={selectedPlant.deviceId}/>
             </div>
         </div>
     );

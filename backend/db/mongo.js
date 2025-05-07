@@ -6,6 +6,15 @@ const plantStatusSchema = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
+const plantResultSchema = new mongoose.Schema({
+  score: Number,
+  plant: String,
+  status: String,
+  issues: Array,
+  user_feedback: String,
+  evaluated_at: { type: Date, default: Date.now },
+});
+
 const lightSensorSchema = new mongoose.Schema({
   light: Number,
   device: String,
@@ -54,6 +63,12 @@ const humidityAvg = new mongoose.Schema({
   timestamp: { type: Date, default: Date.now },
 });
 
+const scoreAvg = new mongoose.Schema({
+  avg: Number,
+  plant: String,
+  timestamp: { type: Date, default: Date.now },
+});
+
 const lightCommandSchema = new mongoose.Schema({
   status: String,
   device: String,
@@ -62,7 +77,7 @@ const lightCommandSchema = new mongoose.Schema({
 
 export const PlantStatusReading = mongoose.model("PlantStatus", plantStatusSchema, "plant_status");
 
-export const PlantResultReading = mongoose.model("PlantResult", plantStatusSchema, "plant_results");
+export const PlantResultReading = mongoose.model("plant_result", plantResultSchema, "plant_results");
 
 export const LightSensorReading = mongoose.model("light", lightSensorSchema);
 
@@ -85,6 +100,7 @@ export const LightAvg = mongoose.model("light_avg", lightAvgSchema);
 export const TemperatureAvg = mongoose.model("temperature_avg", temperatureAvg);
 export const HumidityAvg = mongoose.model("humidity_avg", humidityAvg);
 export const MoistureAvg = mongoose.model("moisture_avg", moistureAvg);
+export const ScoreAvg = mongoose.model("score_avg", scoreAvg);
 
 export const LightCommand = mongoose.model("lightCommands", lightCommandSchema);
 

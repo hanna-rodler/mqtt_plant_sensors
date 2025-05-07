@@ -8,6 +8,13 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
   const [range, setRange] = useState('today'); // 'today' | 'thisWeek' | 'lastWeek'
   const [historyData, setHistoryData] = useState([]);
   const [showDataPoints, setShowDataPoints] = useState([]);
+  let endpoint = "";
+
+  if (endpointKey === "scores"){
+    endpoint = "plants";
+  } else {
+    endpoint = "sensors";
+  }
 
   useEffect(() => {
     async function fetchHistoryData() {

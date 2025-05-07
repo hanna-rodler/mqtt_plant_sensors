@@ -26,31 +26,6 @@ export const fetchHumidityByDeviceId = async (deviceId) => {
     return res.json();
 };
 
-// history
-export async function fetchMoistureHistoryByDeviceId(deviceId) {
-    const response = await fetch(`${BASE_URL}/moistures/${deviceId}`);
-    const data = await response.json();
-    return data;
-}
-
-export async function fetchTemperatureHistoryByDeviceId(deviceId) {
-    const response = await fetch(`${BASE_URL}/temperatures/${deviceId}`);
-    const data = await response.json();
-    return data;
-}
-
-export async function fetchLightHistoryByDeviceId(deviceId) {
-    const response = await fetch(`${BASE_URL}/lights/${deviceId}`);
-    const data = await response.json();
-    return data;
-}
-
-export async function fetchHumidityHistoryByDeviceId(deviceId) {
-    const response = await fetch(`${BASE_URL}/humidities/${deviceId}`);
-    const data = await response.json();
-    return data;
-}
-
 
 // status
 export const sendPlantStatus = async (plantId, status) => {

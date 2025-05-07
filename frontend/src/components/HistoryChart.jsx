@@ -8,11 +8,18 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
   const [range, setRange] = useState('today'); // 'today' | 'thisWeek' | 'lastWeek'
   const [historyData, setHistoryData] = useState([]);
   const [showDataPoints, setShowDataPoints] = useState([]);
+  let endpoint = "";
+
+  if (endpointKey === "scores"){
+    endpoint = "plants";
+  } else {
+    endpoint = "sensors";
+  }
 
   useEffect(() => {
     async function fetchHistoryData() {
       try {
-        const url = `http://localhost:3001/api/sensors/${endpointKey}/${deviceId}/${range.toLowerCase()}`;
+        const url = `http://localhost:3001/api/${endpoint}/${endpointKey}/${deviceId}/${range.toLowerCase()}`;
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Fetch failed for ${endpointKey}`);
         const data = await response.json();

@@ -22,7 +22,13 @@ export const PlantProvider = ({ children }) => {
         {
             id: '2',
             name: 'Plant 2',
-            deviceId: 'device2',
+            deviceId: 'plant2',
+            image: '/images/plant2.jpeg',
+        },
+        {
+            id: '3',
+            name: 'Plant 3',
+            deviceId: 'plant1',
             image: '/images/plant2.jpeg',
         },
     ]);
@@ -73,8 +79,6 @@ export const PlantProvider = ({ children }) => {
     };
 
 
-    setPlants(updated);
-  };
 
   useEffect(() => {
     fetchSensorData();

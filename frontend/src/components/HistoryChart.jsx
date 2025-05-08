@@ -71,6 +71,7 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
             <XAxis
               dataKey="timestamp"
               tickFormatter={(value) => {
+                console.log("Value:", value);
                 const date = new Date(value);
                 console.log("Date:", date);
                 return range === 'today'

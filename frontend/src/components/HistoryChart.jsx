@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatInTimeZone } from 'date-fns-tz'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
@@ -74,14 +75,26 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
                 console.log("Value:", value);
                 const date = new Date(value);
                 console.log("Date:", date);
+                const utcDate = new Date(value);
+                // Convert to local time zone
+                const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                console.log("Timezone:", timeZone);
+                // Format the local date
+                const formattedDate = formatInTimeZone(date, timeZone, 'yyyy-MM-dd HH:mm:ssXXX')
+                const timeZoneDate = new Date(formattedDate);
+                // const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                // const localDate = utcToZonedTime(utcDate, timezone);
+                // const output = format(localDate, 'dd.MM.yyyy HH:mm:ss', { timeZone: timezone });
+                console.log("Formatted Date:", formattedDate);
                 return range === 'today'
                   ? date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-                  : `${date.getDate()}.${date.getMonth() + 1}`
+                  : `${timeZoneDate.getDate()}.${timeZoneDate.getMonth() + 1}`
               }}
             />
             <YAxis />
             <Tooltip
               labelFormatter={(value) => {
+                
                 const date = new Date(value);
                 return range === 'today'
                   ? date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })

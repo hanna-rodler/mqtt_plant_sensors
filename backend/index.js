@@ -11,11 +11,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: [
-      "http://localhost:3000",
-      "https://smart-plants-fe.onrender.com",
-      "https://mqtt-plant-sensors.vercel.app",
-    ],
+    origin: ["http://localhost:3000", "https://mqtt-plant-sensors.vercel.app"],
     methods: ["GET", "POST"],
   })
 );

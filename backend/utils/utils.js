@@ -7,7 +7,8 @@ import {
   TemperatureAvg,
   MoistureAvg,
   HumidityAvg,
-  ScoreAvg, PlantResultReading
+  ScoreAvg,
+  PlantResultReading,
 } from "../db/mongo.js";
 import { startOfWeek, isToday, isYesterday } from "date-fns";
 import Plant from "../routes/plant.js";
@@ -18,6 +19,7 @@ export async function calcAverageLight(deviceId, day) {
     return res.status(400).json({ error: "Invalid date" });
   }
   const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+  const middleOfDay = new Date(date.setHours(12, 0, 0, 0));
   const endOfDay = new Date(date.setHours(23, 59, 59, 999));
 
   const existingAvg = await LightAvg.findOne({
@@ -53,11 +55,11 @@ export async function calcAverageLight(deviceId, day) {
       const lightAvg = new LightAvg({
         avg: average,
         device: deviceId,
-        timestamp: date,
+        timestamp: middleOfDay,
       });
       try {
         lightAvg.save();
-        console.log("💾 Saved light average to MongoDB");
+        console.log("💾 Saved light average to MongoDB", lightAvg.timestamp);
       } catch (err) {
         console.error("❌ Error saving light average to MongoDB:", err);
       }
@@ -74,6 +76,7 @@ export async function calcAverageTemperature(deviceId, day) {
     return res.status(400).json({ error: "Invalid date" });
   }
   const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+  const middleOfDay = new Date(date.setHours(12, 0, 0, 0));
   const endOfDay = new Date(date.setHours(23, 59, 59, 999));
 
   const existingAvg = await TemperatureAvg.findOne({
@@ -109,7 +112,7 @@ export async function calcAverageTemperature(deviceId, day) {
       const sensorAvg = new TemperatureAvg({
         avg: average,
         device: deviceId,
-        timestamp: date,
+        timestamp: middleOfDay,
       });
       try {
         sensorAvg.save();
@@ -130,6 +133,7 @@ export async function calcAverageMoisture(deviceId, day) {
     return res.status(400).json({ error: "Invalid date" });
   }
   const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+  const middleOfDay = new Date(date.setHours(12, 0, 0, 0));
   const endOfDay = new Date(date.setHours(23, 59, 59, 999));
 
   const existingAvg = await MoistureAvg.findOne({
@@ -167,7 +171,7 @@ export async function calcAverageMoisture(deviceId, day) {
       const sensorAvg = new MoistureAvg({
         avg: average,
         device: deviceId,
-        timestamp: date,
+        timestamp: middleOfDay,
       });
       try {
         if (sensorAvg.avg !== null) {
@@ -191,6 +195,7 @@ export async function calcAverageHumidity(deviceId, day) {
     return res.status(400).json({ error: "Invalid date" });
   }
   const startOfDay = new Date(date.setHours(0, 0, 0, 0));
+  const middleOfDay = new Date(date.setHours(12, 0, 0, 0));
   const endOfDay = new Date(date.setHours(23, 59, 59, 999));
 
   const existingAvg = await HumidityAvg.findOne({
@@ -228,7 +233,7 @@ export async function calcAverageHumidity(deviceId, day) {
       const sensorAvg = new HumidityAvg({
         avg: average,
         device: deviceId,
-        timestamp: date,
+        timestamp: middleOfDay,
       });
       try {
         sensorAvg.save();
@@ -257,7 +262,7 @@ export function getLastWeekDates() {
 export function getThisWeekDates() {
   const today = new Date();
   const firstWeekDay = startOfWeek(today, { weekStartsOn: 1 });
-  console.log('firstWeekDay ', firstWeekDay);
+  console.log("firstWeekDay ", firstWeekDay);
   const endOfWeek = new Date(today.setHours(23, 59, 59, 999));
   const daysInCurrentWeek = endOfWeek.getDay();
   return { firstWeekDay: firstWeekDay, daysInCurrentWeek: daysInCurrentWeek };
@@ -281,17 +286,17 @@ export async function calcAverageScore(plantId, day) {
   });
 
   if (
-      existingAvg &&
-      existingAvg.avg !== null &&
-      !isToday(date) &&
-      !isYesterday(date)
+    existingAvg &&
+    existingAvg.avg !== null &&
+    !isToday(date) &&
+    !isYesterday(date)
   ) {
     return existingAvg;
   }
 
   try {
-    const testRes = await PlantResultReading.findOne({plant: plantId});
-    console.log('testRes', testRes);
+    const testRes = await PlantResultReading.findOne({ plant: plantId });
+    console.log("testRes", testRes);
     const result = await PlantResultReading.aggregate([
       {
         $match: {
@@ -307,8 +312,7 @@ export async function calcAverageScore(plantId, day) {
       },
     ]);
 
-    console.log('result ', result);
-
+    console.log("result ", result);
 
     const average = result.length > 0 ? result[0].averageScore : null;
 

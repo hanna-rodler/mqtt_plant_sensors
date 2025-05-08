@@ -2,25 +2,26 @@ const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 // single value
 export const fetchMoistureByDeviceId = async (deviceId) => {
-  const res = await fetch(`${BASE_URL}/moisture/${deviceId}`);
+  const res = await fetch(`${BASE_URL}/sensors/moisture/${deviceId}`);
   if (!res.ok) throw new Error("Failed to fetch moisture");
   return res.json();
 };
 
 export const fetchTemperatureByDeviceId = async (deviceId) => {
-  const res = await fetch(`${BASE_URL}/temperature/${deviceId}`);
+  const res = await fetch(`${BASE_URL}/sensors/temperature/${deviceId}`);
   if (!res.ok) throw new Error("Failed to fetch temperature");
   return res.json();
 };
 
 export const fetchLightByDeviceId = async (deviceId) => {
-  const res = await fetch(`${BASE_URL}/light/${deviceId}`);
+  const res = await fetch(`${BASE_URL}/sensors/light/${deviceId}`);
+  console.log("last light res", res);
   if (!res.ok) throw new Error("Failed to fetch light");
   return res.json();
 };
 
 export const fetchHumidityByDeviceId = async (deviceId) => {
-  const res = await fetch(`${BASE_URL}/humidity/${deviceId}`);
+  const res = await fetch(`${BASE_URL}/sensors/humidity/${deviceId}`);
   if (!res.ok) throw new Error("Failed to fetch temperature");
   return res.json();
 };

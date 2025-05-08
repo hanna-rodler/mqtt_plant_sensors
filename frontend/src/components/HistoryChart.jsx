@@ -19,7 +19,7 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
   useEffect(() => {
     async function fetchHistoryData() {
       try {
-        const url = `${process.env.REACT_APP_API_BASE_URL}/sensors/${endpointKey}/${deviceId}/${range.toLowerCase()}`;
+        const url = `${process.env.REACT_APP_API_BASE_URL}/${endpoint}/${endpointKey}/${deviceId}/${range.toLowerCase()}`;
         console.log('Fetching data from:', url);
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Fetch failed for ${endpointKey}`);

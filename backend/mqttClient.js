@@ -25,8 +25,6 @@ client.on("connect", () => {
   client.subscribe("sensors/+/moisture");
   client.subscribe("sensors/+/temperature");
   client.subscribe("sensors/+/humidity");
-
-  client.publish("eval/plants", "Hello");
 });
 
 client.on("message", async (topic, message) => {
@@ -42,47 +40,13 @@ client.on("message", async (topic, message) => {
         light: message.toString(),
         device: deviceId,
       });
-
-      const topic = `smartplant/lightcontrol`;
-      const lightNum = parseInt(message.toString(), 10);
-      if (lightNum > 45) {
-        client.publish(topic, `{\"state\": \"OFF\"}`, (err) => {
-          console.log("Light level is high, turning off light");
-          if (err) {
-            console.log("❌ Error publishing:", err);
-          } else {
-            console.log("✅ Message published to ".topic);
-            // convert string to number
-            const lightCommand = new LightCommand({
-              state: "OFF",
-              device: deviceId,
-            });
-            lightCommand.save();
-          }
-        });
-      } else {
-        const lightCommandOn = `{\"state\": \"ON\"}`;
-        client.publish(topic, lightCommandOn, (err) => {
-          console.log("Light level is low. Turning light on");
-          if (err) {
-            console.log("❌ Error publishing:", err);
-          } else {
-            console.log("✅ Message published to ".topic);
-            // convert string to number
-            const lightCommand = new LightCommand({
-              state: "ON",
-              device: deviceId,
-            });
-            lightCommand.save();
-          }
-        });
-      }
     } else if (topic.match(/sensors\/([^/]+)\/moisture/)) {
       console.log("Moisture message received:", message.toString());
       reading = new MoistureSensorReading({
         moisture: message.toString(),
         device: deviceId,
       });
+      client.publish("eval/plants", "");
     } else if (topic.match(/sensors\/([^/]+)\/temperature/)) {
       const raw = message.toString();
       const payload = JSON.parse(raw);

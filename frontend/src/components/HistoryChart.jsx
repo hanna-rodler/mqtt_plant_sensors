@@ -24,11 +24,9 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
     async function fetchHistoryData() {
       try {
         const url = `${process.env.REACT_APP_API_BASE_URL}/${endpoint}/${endpointKey}/${deviceId}/${range.toLowerCase()}`;
-        console.log('Fetching data from:', url);
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Fetch failed for ${endpointKey}`);
         const data = await response.json();
-        console.log('Fetched data:', data);
         // check if all data avgs are null
         const allNull = data.every((item) => item.avg === null);
         // count how many items are not null

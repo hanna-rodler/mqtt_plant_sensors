@@ -35,7 +35,6 @@ export async function calcAverageLight(deviceId, day) {
     return existingAvg;
   } else {
     try {
-      console.log("Looking for light average ", date);
       const result = await LightSensorReading.aggregate([
         {
           $match: {
@@ -59,7 +58,6 @@ export async function calcAverageLight(deviceId, day) {
       });
       try {
         lightAvg.save();
-        console.log("💾 Saved light average to MongoDB", lightAvg.timestamp);
       } catch (err) {
         console.error("❌ Error saving light average to MongoDB:", err);
       }
@@ -89,7 +87,6 @@ export async function calcAverageTemperature(deviceId, day) {
     !isToday(date) &&
     !isYesterday(date)
   ) {
-    console.log("Found existing average:", existingAvg);
     return existingAvg;
   } else {
     try {
@@ -116,7 +113,6 @@ export async function calcAverageTemperature(deviceId, day) {
       });
       try {
         sensorAvg.save();
-        console.log("💾 Saved temperature average to MongoDB");
       } catch (err) {
         console.error("❌ Error saving temperature average to MongoDB:", err);
       }
@@ -147,10 +143,8 @@ export async function calcAverageMoisture(deviceId, day) {
     !isToday(date) &&
     !isYesterday(date)
   ) {
-    console.log("Found existing average:", existingAvg);
     return existingAvg;
   } else {
-    console.log("Looking for moisture average");
     try {
       const result = await MoistureSensorReading.aggregate([
         {
@@ -176,7 +170,6 @@ export async function calcAverageMoisture(deviceId, day) {
       try {
         if (sensorAvg.avg !== null) {
           sensorAvg.save();
-          console.log("💾 Saved temperature average to MongoDB");
         } else {
         }
       } catch (err) {
@@ -209,10 +202,8 @@ export async function calcAverageHumidity(deviceId, day) {
     !isToday(date) &&
     !isYesterday(date)
   ) {
-    console.log("Found existing average:", existingAvg);
     return existingAvg;
   } else {
-    console.log("Looking for moisture average");
     try {
       const result = await HumiditySensorReading.aggregate([
         {
@@ -237,7 +228,6 @@ export async function calcAverageHumidity(deviceId, day) {
       });
       try {
         sensorAvg.save();
-        console.log("💾 Saved temperature average to MongoDB");
       } catch (err) {
         console.error("❌ Error saving temperature average to MongoDB:", err);
       }
@@ -262,7 +252,6 @@ export function getLastWeekDates() {
 export function getThisWeekDates() {
   const today = new Date();
   const firstWeekDay = startOfWeek(today, { weekStartsOn: 1 });
-  console.log("firstWeekDay ", firstWeekDay);
   const endOfWeek = new Date(today.setHours(23, 59, 59, 999));
   const daysInCurrentWeek = endOfWeek.getDay();
   return { firstWeekDay: firstWeekDay, daysInCurrentWeek: daysInCurrentWeek };
@@ -276,7 +265,7 @@ export async function calcAverageScore(plantId, day) {
 
   const startOfDay = new Date(date);
   startOfDay.setHours(0, 0, 0, 0);
-
+  const middleOfDay = new Date(date.setHours(12, 0, 0, 0));
   const endOfDay = new Date(date);
   endOfDay.setHours(23, 59, 59, 999);
 
@@ -296,7 +285,6 @@ export async function calcAverageScore(plantId, day) {
 
   try {
     const testRes = await PlantResultReading.findOne({ plant: plantId });
-    console.log("testRes", testRes);
     const result = await PlantResultReading.aggregate([
       {
         $match: {
@@ -312,19 +300,16 @@ export async function calcAverageScore(plantId, day) {
       },
     ]);
 
-    console.log("result ", result);
-
     const average = result.length > 0 ? result[0].averageScore : null;
 
     const scoreAvg = new ScoreAvg({
       avg: average,
       plant: plantId,
-      timestamp: startOfDay,
+      timestamp: middleOfDay,
     });
 
     try {
       await scoreAvg.save();
-      console.log("💾 Saved score average to MongoDB");
     } catch (err) {
       console.error("❌ Error saving score average to MongoDB:", err);
     }

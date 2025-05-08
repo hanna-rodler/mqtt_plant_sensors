@@ -12,72 +12,60 @@ import {
 const PlantContext = createContext();
 
 export const PlantProvider = ({ children }) => {
-    const [plants, setPlants] = useState([
-        {
-            id: '1',
-            name: 'Plant 1',
-            deviceId: 'device1',
-            image: '/images/plant1.jpg',
-        },
-        {
-            id: '2',
-            name: 'Plant 2',
-            deviceId: 'plant2',
-            image: '/images/plant2.jpeg',
-        },
-        {
-            id: '3',
-            name: 'Plant 3',
-            deviceId: 'plant1',
-            image: '/images/plant2.jpeg',
-        },
-    ]);
+  const [plants, setPlants] = useState([
+    {
+      id: "1",
+      name: "Plant 1",
+      deviceId: "device1",
+      image: "/images/plant1.jpg",
+    },
+    {
+      id: "2",
+      name: "Plant 2",
+      deviceId: "plant2",
+      image: "/images/plant2.jpeg",
+    },
+    {
+      id: "3",
+      name: "Plant 3",
+      deviceId: "plant1",
+      image: "/images/plant2.jpeg",
+    },
+  ]);
 
-    const fetchSensorData = async () => {
-        const updated = await Promise.all(
-            plants.map(async (plant) => {
-                console.log("Hole Daten für:", plant.deviceId);
-                const plantId = "plant" + plant.id;
-                try {
-                    const [moisture, temperature, light, humidity, status, score] = await Promise.all([
-                        fetchMoistureByDeviceId(plant.deviceId),
-                        fetchTemperatureByDeviceId(plant.deviceId),
-                        fetchLightByDeviceId(plant.deviceId),
-                        fetchHumidityByDeviceId(plant.deviceId),
-                        fetchStatusByPlantId(plantId),
-                        fetchResultByPlantId(plantId),
-                    ]);
+  const fetchSensorData = async () => {
+    const updated = await Promise.all(
+      plants.map(async (plant) => {
+        const plantId = "plant" + plant.id;
+        try {
+          const [moisture, temperature, light, humidity, status, score] =
+            await Promise.all([
+              fetchMoistureByDeviceId(plant.deviceId),
+              fetchTemperatureByDeviceId(plant.deviceId),
+              fetchLightByDeviceId(plant.deviceId),
+              fetchHumidityByDeviceId(plant.deviceId),
+              fetchStatusByPlantId(plantId),
+              fetchResultByPlantId(plantId),
+            ]);
 
-                    console.log('Erhaltene Werte für', plant.name, {
-                        moisture,
-                        temperature,
-                        light,
-                        humidity,
-                        status,
-                        score,
-                    });
+          return {
+            ...plant,
+            moisture: moisture[0]?.moisture ?? null,
+            temperature: temperature[0]?.temperature ?? null,
+            light: light[0]?.light ?? null,
+            humidity: humidity[0]?.humidity ?? null,
+            status: status[0]?.status ?? null,
+            score: score[0]?.score ?? null,
+          };
+        } catch (error) {
+          console.error(`Fehler bei ${plant.name}:`, error);
+          return plant;
+        }
+      })
+    );
 
-
-                    return {
-                        ...plant,
-                        moisture: moisture[0]?.moisture ?? null,
-                        temperature: temperature[0]?.temperature ?? null,
-                        light: light[0]?.light ?? null,
-                        humidity: humidity[0]?.humidity ?? null,
-                        status: status[0]?.status ?? null,
-                        score: score[0]?.score ?? null,
-                    };
-
-                } catch (error) {
-                    console.error(`Fehler bei ${plant.name}:`, error);
-                    return plant;
-                }
-            })
-        );
-
-        setPlants(updated);
-    };
-
+    setPlants(updated);
+  };
 
   useEffect(() => {
     fetchSensorData();
@@ -95,9 +83,8 @@ export const PlantProvider = ({ children }) => {
 
     try {
       await sendPlantStatus(plantId, newStatus);
-      console.log("Status gespeichert für", plant.name);
     } catch (err) {
-      console.error("Fehler beim Senden an die DB:", err);
+      console.error("Error sending to DB:", err);
     }
   };
 

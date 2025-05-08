@@ -15,7 +15,6 @@ export const fetchTemperatureByDeviceId = async (deviceId) => {
 
 export const fetchLightByDeviceId = async (deviceId) => {
   const res = await fetch(`${BASE_URL}/sensors/light/${deviceId}`);
-  console.log("last light res", res);
   if (!res.ok) throw new Error("Failed to fetch light");
   return res.json();
 };

@@ -24,6 +24,7 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
         const response = await fetch(url);
         if (!response.ok) throw new Error(`Fetch failed for ${endpointKey}`);
         const data = await response.json();
+        console.log('Fetched data:', data);
         // check if all data avgs are null
         const allNull = data.every((item) => item.avg === null);
         // count how many items are not null
@@ -73,7 +74,7 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
                 const date = new Date(value);
                 return range === 'today'
                   ? date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-                  : date.toLocaleString('de-DE', { day: '2-digit', month: '2-digit' });
+                  : `${date.getDate()}.${date.getMonth() + 1}`
               }}
             />
             <YAxis />
@@ -82,7 +83,7 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
                 const date = new Date(value);
                 return range === 'today'
                   ? date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-                  : date.toLocaleString('de-DE', { day: '2-digit', month: '2-digit'});
+                  : `${date.getDate()}.${date.getMonth() + 1}`;
               }}
             />
             <Line

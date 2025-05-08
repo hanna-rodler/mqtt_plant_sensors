@@ -72,6 +72,7 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
               dataKey="timestamp"
               tickFormatter={(value) => {
                 const date = new Date(value);
+                console.log("Date:", date);
                 return range === 'today'
                   ? date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
                   : `${date.getDate()}.${date.getMonth() + 1}`

@@ -74,21 +74,21 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
               tickFormatter={(value) => {
                 console.log("Value:", value);
                 const date = new Date(value);
-                console.log("Date:", date);
-                const utcDate = new Date(value);
                 // Convert to local time zone
                 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+                console.log(locale); // often defaults to "en-US"
+
                 console.log("Timezone:", timeZone);
                 // Format the local date
-                const formattedDate = formatInTimeZone(date, timeZone, 'yyyy-MM-dd HH:mm:ssXXX')
-                const timeZoneDate = new Date(formattedDate);
-                // const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                // const localDate = utcToZonedTime(utcDate, timezone);
-                // const output = format(localDate, 'dd.MM.yyyy HH:mm:ss', { timeZone: timezone });
-                console.log("Formatted Date:", formattedDate);
+
+                const options = { timeZone: timeZone, month: 'numeric', day: 'numeric' };
+                const formattedDate2 = new Intl.DateTimeFormat(locale, options).format(date);
+                console.log("Formatted Date2 :", formattedDate2);
+
                 return range === 'today'
                   ? date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-                  : `${timeZoneDate.getDate()}.${timeZoneDate.getMonth() + 1}`
+                  : formattedDate2
               }}
             />
             <YAxis />

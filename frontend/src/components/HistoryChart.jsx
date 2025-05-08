@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { formatInTimeZone } from 'date-fns-tz'
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
@@ -9,6 +8,10 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
   const [range, setRange] = useState('today'); // 'today' | 'thisWeek' | 'lastWeek'
   const [historyData, setHistoryData] = useState([]);
   const [showDataPoints, setShowDataPoints] = useState([]);
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+  const weekOptions = { timeZone: timeZone, month: 'numeric', day: 'numeric' };
+  const dayOptions = { timeZone: timeZone, hour: '2-digit', minute: '2-digit' };
   let endpoint = "";
 
   if (endpointKey === "scores"){
@@ -72,23 +75,11 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
             <XAxis
               dataKey="timestamp"
               tickFormatter={(value) => {
-                console.log("Value:", value);
                 const date = new Date(value);
                 // Convert to local time zone
-                const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                const locale = Intl.DateTimeFormat().resolvedOptions().locale;
-                console.log(locale); // often defaults to "en-US"
-
-                console.log("Timezone:", timeZone);
-                // Format the local date
-
-                const options = { timeZone: timeZone, month: 'numeric', day: 'numeric' };
-                const formattedDate2 = new Intl.DateTimeFormat(locale, options).format(date);
-                console.log("Formatted Date2 :", formattedDate2);
-
                 return range === 'today'
-                  ? date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-                  : formattedDate2
+                  ? new Intl.DateTimeFormat(locale, dayOptions).format(date)
+                  : new Intl.DateTimeFormat(locale, weekOptions).format(date);
               }}
             />
             <YAxis />
@@ -97,8 +88,8 @@ const HistoryChart = ({ title, dataKey, endpointKey, deviceId }) => {
                 
                 const date = new Date(value);
                 return range === 'today'
-                  ? date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-                  : `${date.getDate()}.${date.getMonth() + 1}`;
+                  ? new Intl.DateTimeFormat(locale, dayOptions).format(date)
+                  : new Intl.DateTimeFormat(locale, weekOptions).format(date);
               }}
             />
             <Line

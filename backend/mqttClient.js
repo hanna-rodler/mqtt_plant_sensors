@@ -26,43 +26,12 @@ client.on("connect", () => {
   client.subscribe("sensors/+/temperature");
   client.subscribe("sensors/+/humidity");
 
-  const message = JSON.stringify({ state: "OFF" });
-
-  const topic = `smartplant/lightcontrol`;
-  client.publish(topic, message, (err) => {
-    if (err) {
-      console.log("❌ Error publishing:", err);
-    } else {
-      console.log("✅ Message published to ".topic);
-      // convert string to number
-      const lightNum = parseInt(message.toString(), 10);
-      if (lightNum > 100) {
-        const lightCommand = new LightCommand({
-          status: "on",
-          device: "plant1",
-        });
-        lightCommand.save();
-      } else {
-        const lightCommand = new LightCommand({
-          status: "off",
-          device: "plant1",
-        });
-        lightCommand.save();
-      }
-      console.log("💾 Saved light command to MongoDB");
-    }
-  });
+  client.publish("eval/plants", "Hello");
 });
 
 client.on("message", async (topic, message) => {
   try {
     console.log("📬 MQTT message received:", topic, message.toString());
-    // {temperature: 28, light: 200} parse this object to string
-
-    // regex to match the topic sensors/*/light
-    // const raw = message.toString();
-    // const payload = JSON.parse(raw);
-
     let deviceId = topic.split("/")[1]; // Extract device ID from the topic
 
     let reading;
@@ -75,31 +44,39 @@ client.on("message", async (topic, message) => {
       });
 
       const topic = `smartplant/lightcontrol`;
-      client.publish(topic, message, (err) => {
-        if (err) {
-          console.log("❌ Error publishing:", err);
-        } else {
-          console.log("✅ Message published to ".topic);
-          // convert string to number
-          const lightNum = parseInt(message.toString(), 10);
-          if (lightNum > 100) {
-            const lightCommand = new LightCommand({
-              status: "on",
-              device: deviceId,
-            });
-            lightCommand.save();
+      const lightNum = parseInt(message.toString(), 10);
+      if (lightNum > 45) {
+        client.publish(topic, `{\"state\": \"OFF\"}`, (err) => {
+          console.log("Light level is high, turning off light");
+          if (err) {
+            console.log("❌ Error publishing:", err);
           } else {
+            console.log("✅ Message published to ".topic);
+            // convert string to number
             const lightCommand = new LightCommand({
-              status: "off",
+              state: "OFF",
               device: deviceId,
             });
             lightCommand.save();
           }
-          console.log("💾 Saved light command to MongoDB");
-        }
-
-        // After publishing, disconnect the client
-      });
+        });
+      } else {
+        const lightCommandOn = `{\"state\": \"ON\"}`;
+        client.publish(topic, lightCommandOn, (err) => {
+          console.log("Light level is low. Turning light on");
+          if (err) {
+            console.log("❌ Error publishing:", err);
+          } else {
+            console.log("✅ Message published to ".topic);
+            // convert string to number
+            const lightCommand = new LightCommand({
+              state: "ON",
+              device: deviceId,
+            });
+            lightCommand.save();
+          }
+        });
+      }
     } else if (topic.match(/sensors\/([^/]+)\/moisture/)) {
       console.log("Moisture message received:", message.toString());
       reading = new MoistureSensorReading({

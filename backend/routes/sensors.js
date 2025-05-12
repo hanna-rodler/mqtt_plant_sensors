@@ -56,7 +56,7 @@ router.get("/lights/:deviceId/today", async (req, res) => {
     device: deviceId,
     timestamp: { $gte: startOfDay, $lte: endOfDay },
   })
-    .sort({ timestamp: -1 })
+    .sort({ timestamp: 1 })
     .limit(200);
   res.json(data);
 });
@@ -154,7 +154,7 @@ router.get("/temperatures/:deviceId/today", async (req, res) => {
   const data = await TemperatureSensorReading.find({
     device: deviceId,
     timestamp: { $gte: startOfDay, $lte: endOfDay },
-  }).sort({ timestamp: -1 });
+  }).sort({ timestamp: 1 });
   res.json(data);
 });
 
@@ -247,7 +247,7 @@ router.get("/moistures/:deviceId/today", async (req, res) => {
     device: deviceId,
     timestamp: { $gte: startOfDay, $lte: endOfDay },
   })
-    .sort({ timestamp: -1 })
+    .sort({ timestamp: 1 })
     .limit(200);
   res.json(data);
 });
@@ -342,7 +342,7 @@ router.get("/humidities/:deviceId/today", async (req, res) => {
   const data = await HumiditySensorReading.find({
     device: deviceId,
     timestamp: { $gte: startOfDay, $lte: endOfDay },
-  }).sort({ timestamp: -1 });
+  }).sort({ timestamp: 1 });
   res.json(data);
 });
 
